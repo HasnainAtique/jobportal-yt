@@ -37,7 +37,7 @@ export const postJob = async (req, res) => {
 // student k liye
 export const getAllJobs = async (req, res) => {
     try {
-        const keyword = req.query.keyword || "";
+        const keyword = "";
         const query = {
             $or: [
                 { title: { $regex: keyword, $options: "i" } },
@@ -66,7 +66,7 @@ export const getJobById = async (req, res) => {
     try {
         const jobId = req.params.id;
         const job = await Job.findById(jobId).populate({
-            path:"applications"
+            path: "applications"
         });
         if (!job) {
             return res.status(404).json({
@@ -84,8 +84,8 @@ export const getAdminJobs = async (req, res) => {
     try {
         const adminId = req.id;
         const jobs = await Job.find({ created_by: adminId }).populate({
-            path:'company',
-            createdAt:-1
+            path: 'company',
+            createdAt: -1
         });
         if (!jobs) {
             return res.status(404).json({
@@ -116,6 +116,20 @@ export const deleteJobs = async (req, res) => {
             message: "Jobs and related applications deleted successfully",
             success: true
         });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal server error", success: false });
+    }
+};
+export const updateJob = async (req, res) => {
+    try {
+        const jobId = req.params.id;
+        const updateData = req.body;
+        const job = await Job.findByIdAndUpdate(jobId, updateData, { new: true });
+        if (!job) {
+            return res.status(404).json({ message: "Job not found.", success: false });
+        }
+        return res.status(200).json({ message: "Job updated successfully.", job, success: true });
     } catch (error) {
         console.log(error);
         res.status(500).json({ message: "Internal server error", success: false });

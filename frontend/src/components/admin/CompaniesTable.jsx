@@ -26,7 +26,7 @@ const CompaniesTable = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this company?")) {
             try {
-                const res = await axios.delete(`${COMPANY_API_END_POINT}/${id}`, {
+                const res = await axios.delete(`${COMPANY_API_END_POINT}/delete/${id}`, {
                     withCredentials: true
                 });
                 if (res.data.success) {
