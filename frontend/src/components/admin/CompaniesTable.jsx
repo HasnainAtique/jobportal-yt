@@ -26,7 +26,7 @@ const CompaniesTable = () => {
     const handleDelete = async (id) => {
         if (window.confirm("Are you sure you want to delete this company?")) {
             try {
-                const res = await axios.delete(`${COMPANY_API_END_POINT}    /${id}`, {
+                const res = await axios.delete(`${COMPANY_API_END_POINT}/${id}`, {
                     withCredentials: true
                 });
                 if (res.data.success) {
@@ -44,7 +44,7 @@ const CompaniesTable = () => {
     return (
         <div>
             <Table>
-                <TableCaption>A list of your recently registered companies</TableCaption>
+                <TableCaption>A list of your recently registered companies11</TableCaption>
                 <TableHeader>
                     <TableRow>
                         <TableHead>Logo</TableHead>
