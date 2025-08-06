@@ -1,6 +1,9 @@
 import { Company } from "../models/company.model.js";
 import getDataUri from "../utils/datauri.js";
 import cloudinary from "../utils/cloudinary.js";
+import { Job } from "../models/job.model.js";
+import { Application } from "../models/application.model.js";
+import mongoose from "mongoose";
 
 export const registerCompany = async (req, res) => {
     try {
@@ -44,7 +47,7 @@ export const getCompany = async (req, res) => {
         }
         return res.status(200).json({
             companies,
-            success:true
+            success: true
         })
     } catch (error) {
         console.log(error);
@@ -72,13 +75,13 @@ export const getCompanyById = async (req, res) => {
 export const updateCompany = async (req, res) => {
     try {
         const { name, description, website, location } = req.body;
- 
+
         const file = req.file;
         // idhar cloudinary ayega
         const fileUri = getDataUri(file);
         const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
         const logo = cloudResponse.secure_url;
-    
+
         const updateData = { name, description, website, location, logo };
 
         const company = await Company.findByIdAndUpdate(req.params.id, updateData, { new: true });
@@ -90,11 +93,64 @@ export const updateCompany = async (req, res) => {
             })
         }
         return res.status(200).json({
-            message:"Company information updated.",
-            success:true
+            message: "Company information updated.",
+            success: true
         })
 
     } catch (error) {
         console.log(error);
     }
 }
+
+
+export const deleteCompanyById = async (req, res) => {
+    try {
+        const companyId = req.params.id;
+        console.log("Company ID:", companyId);
+
+        // Check if company exists
+        const company = await Company.findById(companyId);
+        if (!company) {
+            return res.status(404).json({
+                message: "Company not found.",
+                success: false
+            });
+        }
+
+        // Find all jobs related to the company
+        const jobs = await Job.find({ company: companyId });
+
+        // Extract and convert job IDs from buffer
+        const jobIds = jobs.map(job => {
+            const buffer = job._doc._id?.buffer;
+            if (!buffer) return null;
+            const hex = Buffer.from(buffer).toString("hex");
+            return new mongoose.Types.ObjectId(hex);
+        }).filter(id => id !== null);
+
+        console.log("Job IDs to delete:", jobIds);
+
+        // Delete applications related to the jobs
+        const deletedApplications = await Application.deleteMany({ job: { $in: jobIds } });
+        console.log("Applications deleted:", deletedApplications.deletedCount);
+
+        // Delete jobs
+        const deletedJobs = await Job.deleteMany({ company: companyId });
+        console.log("Jobs deleted:", deletedJobs.deletedCount);
+
+        // Delete company
+        await Company.findByIdAndDelete(companyId);
+
+        return res.status(200).json({
+            message: "Company, its jobs, and all related applications deleted successfully.",
+            success: true
+        });
+    } catch (error) {
+        console.error("Delete Error:", error);
+        return res.status(500).json({
+            message: "Server error while deleting company.",
+            success: false
+        });
+    }
+};
+

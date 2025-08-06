@@ -1,6 +1,7 @@
 import { Job } from "../models/job.model.js";
+import { Application } from "../models/application.model.js";
+import mongoose from "mongoose";
 
-// admin post krega job
 export const postJob = async (req, res) => {
     try {
         const { title, description, requirements, salary, location, jobType, experience, position, companyId } = req.body;
@@ -100,3 +101,23 @@ export const getAdminJobs = async (req, res) => {
         console.log(error);
     }
 }
+export const deleteJobs = async (req, res) => {
+    try {
+
+        const jobId = req.params.id;
+
+        // Delete jobs
+        await Job.deleteMany({ _id: { $in: jobId } });
+
+        // Delete related applications
+        await Application.deleteMany({ job: { $in: jobId } });
+
+        return res.status(200).json({
+            message: "Jobs and related applications deleted successfully",
+            success: true
+        });
+    } catch (error) {
+        console.log(error);
+        res.status(500).json({ message: "Internal server error", success: false });
+    }
+};

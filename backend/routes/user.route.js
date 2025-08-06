@@ -4,7 +4,9 @@ import isAuthenticated from "../middlewares/isAuthenticated.js";
 import { singleUpload } from "../middlewares/mutler.js";
  
 const router = express.Router();
-
+router.get("/test", (req, res) => {
+  res.json({ message: "✅ User route working!" });
+});
 router.route("/register").post(singleUpload,register);
 router.route("/login").post(login);
 router.route("/logout").get(logout);
