@@ -7,7 +7,7 @@ import cloudinary from "../utils/cloudinary.js";
 export const register = async (req, res) => {
     try {
         const { fullname, email, phoneNumber, password, role } = req.body;
-         
+
         if (!fullname || !email || !phoneNumber || !password || !role) {
             return res.status(400).json({
                 message: "Something is missing",
@@ -33,8 +33,8 @@ export const register = async (req, res) => {
             phoneNumber,
             password: hashedPassword,
             role,
-            profile:{
-                profilePhoto:cloudResponse.secure_url,
+            profile: {
+                profilePhoto: cloudResponse.secure_url,
             }
         });
 
@@ -49,9 +49,9 @@ export const register = async (req, res) => {
 export const login = async (req, res) => {
     try {
         console.log("Login request received");
-         // console.log(req.body);
+        // console.log(req.body);
         const { email, password, role } = req.body;
-        
+
         if (!email || !password || !role) {
             return res.status(400).json({
                 message: "Something is missing",
@@ -113,61 +113,66 @@ export const logout = async (req, res) => {
         console.log(error);
     }
 }
+// Backend: updateProfile function
 export const updateProfile = async (req, res) => {
     try {
         const { fullname, email, phoneNumber, bio, skills } = req.body;
-        
         const file = req.file;
-        // cloudinary ayega idhar
-        const fileUri = getDataUri(file);
-        const cloudResponse = await cloudinary.uploader.upload(fileUri.content);
 
-
-
-        let skillsArray;
-        if(skills){
-            skillsArray = skills.split(",");
-        }
-        const userId = req.id; // middleware authentication
-        let user = await User.findById(userId);
+        const userId = req.id;
+        const user = await User.findById(userId);
 
         if (!user) {
-            return res.status(400).json({
+            return res.status(404).json({
                 message: "User not found.",
-                success: false
-            })
-        }
-        // updating data
-        if(fullname) user.fullname = fullname
-        if(email) user.email = email
-        if(phoneNumber)  user.phoneNumber = phoneNumber
-        if(bio) user.profile.bio = bio
-        if(skills) user.profile.skills = skillsArray
-      
-        // resume comes later here...
-        if(cloudResponse){
-            user.profile.resume = cloudResponse.secure_url // save the cloudinary url
-            user.profile.resumeOriginalName = file.originalname // Save the original file name
+                success: false,
+            });
         }
 
+        // Update basic fields
+        if (fullname) user.fullname = fullname;
+        if (email) user.email = email;
+        if (phoneNumber) user.phoneNumber = phoneNumber;
+        if (bio) user.profile.bio = bio;
+        if (skills) {
+            const skillsArray = skills.split(',').map(skill => skill.trim());
+            user.profile.skills = skillsArray;
+        }
+
+        // ✅ Save PDF as Base64 in database
+        if (file) {
+            // Convert file buffer to base64
+            const base64String = file.buffer.toString('base64');
+            const dataURI = `data:${file.mimetype};base64,${base64String}`;
+            
+            // Save in database
+            user.profile.resume = dataURI;
+            user.profile.resumeOriginalName = file.originalname;
+            user.profile.resumeSize = file.size;
+            
+            console.log(`File saved: ${file.originalname}, Size: ${file.size} bytes`);
+        }
 
         await user.save();
 
-        user = {
-            _id: user._id,
-            fullname: user.fullname,
-            email: user.email,
-            phoneNumber: user.phoneNumber,
-            role: user.role,
-            profile: user.profile
-        }
-
         return res.status(200).json({
-            message:"Profile updated successfully.",
-            user,
-            success:true
-        })
+            message: "Profile updated successfully.",
+            user: {
+                _id: user._id,
+                fullname: user.fullname,
+                email: user.email,
+                phoneNumber: user.phoneNumber,
+                role: user.role,
+                profile: user.profile,
+            },
+            success: true,
+        });
+
     } catch (error) {
-        console.log(error);
+        console.error("Error updating profile:", error);
+        return res.status(500).json({
+            message: "Something went wrong.",
+            success: false,
+        });
     }
-}
+};

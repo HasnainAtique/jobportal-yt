@@ -1,11 +1,9 @@
 import React, { useEffect, useState } from 'react'
 import Navbar from './shared/Navbar'
-import FilterCard from './FilterCard'
+import FilterCard, { salaryOptions } from './FilterCard'
 import Job from './Job';
 import { useSelector } from 'react-redux';
 import { motion } from 'framer-motion';
-
-// const jobsArray = [1, 2, 3, 4, 5, 6, 7, 8];
 
 const Jobs = () => {
     const { allJobs, searchedQuery } = useSelector(store => store.job);
@@ -13,14 +11,27 @@ const Jobs = () => {
 
     useEffect(() => {
         if (searchedQuery) {
-            const filteredJobs = allJobs.filter((job) => {
-                return job.title.toLowerCase().includes(searchedQuery.toLowerCase()) ||
-                    job.description.toLowerCase().includes(searchedQuery.toLowerCase()) ||
-                    job.location.toLowerCase().includes(searchedQuery.toLowerCase())
-            })
-            setFilterJobs(filteredJobs)
+            // Salary filter
+            const selectedSalary = salaryOptions.find(opt => opt.label === searchedQuery);
+            if (selectedSalary) {
+                const filteredJobs = allJobs.filter(job => {
+                    const salary = Number(job.salary);
+                    return salary >= selectedSalary.min && salary < selectedSalary.max;
+                });
+                setFilterJobs(filteredJobs);
+            } else {
+                // Title, Location, Industry (title)
+                const query = typeof searchedQuery === "string" ? searchedQuery : String(searchedQuery || "");
+                const filteredJobs = allJobs.filter((job) => {
+                    return (
+                        job.title?.toLowerCase().includes(query.toLowerCase()) ||
+                        job.location?.toLowerCase().includes(query.toLowerCase())
+                    );
+                });
+                setFilterJobs(filteredJobs);
+            }
         } else {
-            setFilterJobs(allJobs)
+            setFilterJobs(allJobs);
         }
     }, [allJobs, searchedQuery]);
 
@@ -54,8 +65,6 @@ const Jobs = () => {
                     }
                 </div>
             </div>
-
-
         </div>
     )
 }
