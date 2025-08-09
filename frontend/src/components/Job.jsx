@@ -18,15 +18,15 @@ const Job = ({ job }) => {
 
     return (
         <div
-            className='p-6 rounded-2xl bg-white/80 backdrop-blur-md border border-gray-200 shadow-md cursor-pointer 
+            className='p-6 rounded-2xl bg-white/80 border border-gray-200 shadow-md cursor-pointer 
              transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform 
              hover:scale-[1.03] hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(0,0,0,0.15)] 
              hover:ring-2 hover:ring-blue-300 hover:rotate-[0.4deg]'
         >
-
+            
             <div className='flex items-center justify-between'>
                 <p className='text-sm text-gray-500'>{daysAgoFunction(job?.createdAt) === 0 ? "Today" : `${daysAgoFunction(job?.createdAt)} days ago`}</p>
-                <Button variant="outline" className="rounded-full" size="icon"><Bookmark /></Button>
+                {/* <Button variant="outline" className="rounded-full" size="icon"><Bookmark /></Button> */}
             </div>
 
             <div className='flex items-center gap-2 my-2'>

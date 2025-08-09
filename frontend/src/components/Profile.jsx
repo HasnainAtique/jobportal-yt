@@ -30,11 +30,11 @@ const Profile = () => {
             }
             const byteArray = new Uint8Array(byteNumbers);
             const blob = new Blob([byteArray], { type: 'application/pdf' });
-            
+
             // Create URL and open in new tab
             const url = URL.createObjectURL(blob);
             window.open(url, '_blank');
-            
+
             // Clean up URL after opening
             setTimeout(() => URL.revokeObjectURL(url), 1000);
         }
@@ -61,7 +61,7 @@ const Profile = () => {
                     <div className='flex items-center gap-4'>
                         <Avatar className="h-24 w-24">
                             <AvatarImage
-                                src="https://www.shutterstock.com/image-vector/circle-line-simple-design-logo-600nw-2174926871.jpg"
+                                src={user?.profile?.profilePhoto || 'default-avatar.png'}
                                 alt="profile"
                             />
                         </Avatar>

@@ -7,7 +7,7 @@ const LatestJobCards = ({job}) => {
     return (
        <div
   onClick={() => navigate(`/description/${job._id}`)}
-  className="p-6 rounded-2xl bg-white/80 backdrop-blur-md border border-gray-200 shadow-md cursor-pointer 
+  className="p-6 rounded-2xl bg-white/80 border border-gray-200 shadow-md cursor-pointer 
              transition-all duration-500 ease-[cubic-bezier(0.4,0,0.2,1)] transform 
              hover:scale-[1.03] hover:-translate-y-1 hover:shadow-[0_15px_30px_rgba(0,0,0,0.15)] 
              hover:ring-2 hover:ring-blue-300 hover:rotate-[0.4deg]"
