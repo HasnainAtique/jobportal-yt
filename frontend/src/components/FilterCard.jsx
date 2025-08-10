@@ -25,7 +25,8 @@ const FilterCard = () => {
     useEffect(() => {
         const fetchJobs = async () => {
             try {
-                const res = await axios.get(`${JOB_API_END_POINT}/get`, { withCredentials: true });
+                // Public route ke liye credentials mat bhejo
+                const res = await axios.get(`${JOB_API_END_POINT}/get`);
                 const jobs = res.data.jobs || [];
                 const locations = [...new Set(jobs.map(job => job.location).filter(loc => !!loc))];
                 const industries = [...new Set(jobs.map(job => job.title).filter(title => !!title))];
@@ -40,6 +41,7 @@ const FilterCard = () => {
         };
         fetchJobs();
     }, []);
+
 
     const changeHandler = (value) => {
         setSelectedValue(String(value));
@@ -65,8 +67,8 @@ const FilterCard = () => {
             <div className="flex items-center justify-between">
                 <h1 className='font-bold text-lg'>Filter Jobs</h1>
                 {selectedValue && (
-                    <button 
-                        onClick={handleClear} 
+                    <button
+                        onClick={handleClear}
                         className='text-sm text-blue-600 hover:underline'
                     >
                         Clear Filter

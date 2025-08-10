@@ -11,6 +11,8 @@ import { toast } from 'sonner'
 import { useDispatch, useSelector } from 'react-redux'
 import { setLoading } from '@/redux/authSlice'
 import { Loader2 } from 'lucide-react'
+import InputMask from 'react-input-mask';
+
 
 const Signup = () => {
 
@@ -95,14 +97,23 @@ const Signup = () => {
                     </div>
                     <div className='my-2'>
                         <Label>Phone Number</Label>
-                        <Input
-                            type="text"
+                        <InputMask
+                            mask="0399-9999999"
                             value={input.phoneNumber}
-                            name="phoneNumber"
                             onChange={changeEventHandler}
-                            placeholder="03XX-XXXXXXX"
-                        />
+                        >
+                            {(inputProps) => (
+                                <Input
+                                    {...inputProps}
+                                    type="tel"
+                                    name="phoneNumber"
+                                    placeholder="03XX-XXXXXXX"
+                                    required
+                                />
+                            )}
+                        </InputMask>
                     </div>
+
                     <div className='my-2'>
                         <Label>Password</Label>
                         <Input

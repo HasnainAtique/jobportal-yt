@@ -12,8 +12,9 @@ const HeroSection = () => {
 
     const searchJobHandler = () => {
         dispatch(setSearchedQuery(query));
-        navigate("/browse");
-    }
+        navigate(`/browse?search=${encodeURIComponent(query)}`);
+    };
+
 
     return (
         <div className='text-center'>

@@ -99,8 +99,24 @@ const Profile = () => {
 
                 <div className='grid w-full max-w-sm items-center gap-1.5'>
                     <Label className="text-md font-bold">Resume</Label>
-                    {
-                        hasResume ? (
+                    {hasResume ? (
+                        <div className="flex flex-col gap-2">
+
+                            {/* Resume name + size in one line */}
+                            <div className="flex gap-2 items-center">
+                                {user?.profile?.resumeOriginalName && (
+                                    <span className="text-sm text-gray-700 font-medium">
+                                        {user.profile.resumeOriginalName}
+                                    </span>
+                                )}
+                                {user?.profile?.resumeSize && (
+                                    <span className="text-sm text-gray-500">
+                                        ({Math.round(user.profile.resumeSize / 1024)}KB)
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Buttons */}
                             <div className="flex gap-2 items-center">
                                 <Button
                                     onClick={handleViewResume}
@@ -111,6 +127,7 @@ const Profile = () => {
                                     <Eye className="w-4 h-4 mr-1" />
                                     View
                                 </Button>
+
                                 <Button
                                     onClick={handleDownloadResume}
                                     variant="outline"
@@ -120,17 +137,13 @@ const Profile = () => {
                                     <Download className="w-4 h-4 mr-1" />
                                     Download
                                 </Button>
-                                {user?.profile?.resumeSize && (
-                                    <span className="text-sm text-gray-500">
-                                        ({Math.round(user.profile.resumeSize / 1024)}KB)
-                                    </span>
-                                )}
                             </div>
-                        ) : (
-                            <span>NA</span>
-                        )
-                    }
+                        </div>
+                    ) : (
+                        <span>NA</span>
+                    )}
                 </div>
+
             </div>
 
             <div className='max-w-4xl mx-auto bg-white rounded-2xl'>
