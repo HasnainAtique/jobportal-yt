@@ -3,12 +3,13 @@ import { Dialog, DialogContent, DialogFooter, DialogHeader, DialogTitle } from '
 import { Label } from './ui/label'
 import { Input } from './ui/input'
 import { Button } from './ui/button'
-import { Loader2 } from 'lucide-react'
+import { Loader2, X } from 'lucide-react'
 import { useDispatch, useSelector } from 'react-redux'
 import axios from 'axios'
 import { USER_API_END_POINT } from '@/utils/constant'
 import { setUser } from '@/redux/authSlice'
 import { toast } from 'sonner'
+import InputMask from 'react-input-mask'
 
 const UpdateProfileDialog = ({ open, setOpen }) => {
     const [loading, setLoading] = useState(false);
@@ -19,19 +20,38 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         email: user?.email || "",
         phoneNumber: user?.phoneNumber || "",
         bio: user?.profile?.bio || "",
-        skills: user?.profile?.skills?.map(skill => skill) || "",
+        skills: user?.profile?.skills || [],
         file: user?.profile?.resume || ""
     });
+
+    const [newSkill, setNewSkill] = useState(""); // For new skill input
     const dispatch = useDispatch();
 
     const changeEventHandler = (e) => {
         setInput({ ...input, [e.target.name]: e.target.value });
-    }
+    };
 
     const fileChangeHandler = (e) => {
         const file = e.target.files?.[0];
-        setInput({ ...input, file })
-    }
+        setInput({ ...input, file });
+    };
+
+    const addSkillHandler = () => {
+        if (newSkill.trim() !== "" && !input.skills.includes(newSkill.trim())) {
+            setInput({
+                ...input,
+                skills: [...input.skills, newSkill.trim()]
+            });
+            setNewSkill("");
+        }
+    };
+
+    const removeSkillHandler = (skill) => {
+        setInput({
+            ...input,
+            skills: input.skills.filter(s => s !== skill)
+        });
+    };
 
     const submitHandler = async (e) => {
         e.preventDefault();
@@ -40,16 +60,14 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
         formData.append("email", input.email);
         formData.append("phoneNumber", input.phoneNumber);
         formData.append("bio", input.bio);
-        formData.append("skills", input.skills);
+        formData.append("skills", input.skills.join(","));
         if (input.file) {
             formData.append("file", input.file);
         }
         try {
             setLoading(true);
             const res = await axios.post(`${USER_API_END_POINT}/profile/update`, formData, {
-                headers: {
-                    'Content-Type': 'multipart/form-data'
-                },
+                headers: { 'Content-Type': 'multipart/form-data' },
                 withCredentials: true
             });
             if (res.data.success) {
@@ -58,15 +76,12 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
             }
         } catch (error) {
             console.log(error);
-            toast.error(error.response.data.message);
-        } finally{
+            toast.error(error.response?.data?.message || "Something went wrong");
+        } finally {
             setLoading(false);
         }
         setOpen(false);
-        console.log(input);
-    }
-
-
+    };
 
     return (
         <div>
@@ -77,17 +92,20 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                     </DialogHeader>
                     <form onSubmit={submitHandler}>
                         <div className='grid gap-4 py-4'>
+                            {/* Name */}
                             <div className='grid grid-cols-4 items-center gap-4'>
-                                <Label htmlFor="name" className="text-right">Name</Label>
+                                <Label htmlFor="fullname" className="text-right">Name</Label>
                                 <Input
-                                    id="name"
-                                    name="name"
+                                    id="fullname"
+                                    name="fullname"
                                     type="text"
                                     value={input.fullname}
                                     onChange={changeEventHandler}
                                     className="col-span-3"
                                 />
                             </div>
+
+                            {/* Email */}
                             <div className='grid grid-cols-4 items-center gap-4'>
                                 <Label htmlFor="email" className="text-right">Email</Label>
                                 <Input
@@ -99,16 +117,30 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                     className="col-span-3"
                                 />
                             </div>
+
+                            {/* Phone Number */}
                             <div className='grid grid-cols-4 items-center gap-4'>
-                                <Label htmlFor="number" className="text-right">Number</Label>
-                                <Input
-                                    id="number"
-                                    name="number"
+                                <Label htmlFor="phoneNumber" className="text-right">Number</Label>
+                                <InputMask
+                                    mask="0399-9999999"
                                     value={input.phoneNumber}
                                     onChange={changeEventHandler}
-                                    className="col-span-3"
-                                />
+                                >
+                                    {(inputProps) => (
+                                        <Input
+                                            {...inputProps}
+                                            id="phoneNumber"
+                                            name="phoneNumber"
+                                            type="tel"
+                                            placeholder="03XX-XXXXXXX"
+                                            className="col-span-3"
+                                            required
+                                        />
+                                    )}
+                                </InputMask>
                             </div>
+
+                            {/* Bio */}
                             <div className='grid grid-cols-4 items-center gap-4'>
                                 <Label htmlFor="bio" className="text-right">Bio</Label>
                                 <Input
@@ -119,16 +151,40 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                     className="col-span-3"
                                 />
                             </div>
-                            <div className='grid grid-cols-4 items-center gap-4'>
-                                <Label htmlFor="skills" className="text-right">Skills</Label>
-                                <Input
-                                    id="skills"
-                                    name="skills"
-                                    value={input.skills}
-                                    onChange={changeEventHandler}
-                                    className="col-span-3"
-                                />
+
+                            {/* Skills */}
+                            <div className='grid grid-cols-4 items-start gap-4'>
+                                <Label htmlFor="skills" className="text-right mt-2">Skills</Label>
+                                <div className="col-span-3 space-y-2">
+                                    <div className="flex gap-2">
+                                        <Input
+                                            id="skills"
+                                            name="skills"
+                                            value={newSkill}
+                                            onChange={(e) => setNewSkill(e.target.value)}
+                                            placeholder="Enter a skill"
+                                        />
+                                        <Button type="button" onClick={addSkillHandler}>Add</Button>
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        {input.skills.map((skill, index) => (
+                                            <span
+                                                key={index}
+                                                className="bg-gray-200 text-sm px-2 py-1 rounded-full flex items-center gap-1"
+                                            >
+                                                {skill}
+                                                <X
+                                                    size={14}
+                                                    className="cursor-pointer"
+                                                    onClick={() => removeSkillHandler(skill)}
+                                                />
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
                             </div>
+
+                            {/* Resume */}
                             <div className='grid grid-cols-4 items-center gap-4'>
                                 <Label htmlFor="file" className="text-right">Resume</Label>
                                 <Input
@@ -141,16 +197,21 @@ const UpdateProfileDialog = ({ open, setOpen }) => {
                                 />
                             </div>
                         </div>
+
+                        {/* Submit */}
                         <DialogFooter>
-                            {
-                                loading ? <Button className="w-full my-4"> <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait </Button> : <Button type="submit" className="w-full my-4">Update</Button>
+                            {loading
+                                ? <Button className="w-full my-4">
+                                    <Loader2 className='mr-2 h-4 w-4 animate-spin' /> Please wait
+                                  </Button>
+                                : <Button type="submit" className="w-full my-4">Update</Button>
                             }
                         </DialogFooter>
                     </form>
                 </DialogContent>
             </Dialog>
         </div>
-    )
-}
+    );
+};
 
-export default UpdateProfileDialog
+export default UpdateProfileDialog;

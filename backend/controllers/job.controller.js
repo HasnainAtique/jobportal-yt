@@ -87,6 +87,7 @@ export const getAdminJobs = async (req, res) => {
             path: 'company',
             createdAt: -1
         });
+        console.log(jobs);
         if (!jobs) {
             return res.status(404).json({
                 message: "Jobs not found.",

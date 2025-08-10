@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from 'react'
-import { RadioGroup, RadioGroupItem } from './ui/radio-group'
-import { Label } from './ui/label'
-import { useDispatch } from 'react-redux'
-import { setSearchedQuery } from '@/redux/jobSlice'
-import axios from 'axios'
-import { JOB_API_END_POINT } from '@/utils/constant'
+import React, { useEffect, useState } from 'react';
+import { RadioGroup, RadioGroupItem } from './ui/radio-group';
+import { Label } from './ui/label';
+import { useDispatch } from 'react-redux';
+import { setSearchedQuery } from '@/redux/jobSlice';
+import axios from 'axios';
+import { JOB_API_END_POINT } from '@/utils/constant';
 
 export const salaryOptions = [
     { label: "0-40k", min: 0, max: 40000 },
@@ -25,7 +25,6 @@ const FilterCard = () => {
     useEffect(() => {
         const fetchJobs = async () => {
             try {
-                // Public route ke liye credentials mat bhejo
                 const res = await axios.get(`${JOB_API_END_POINT}/get`);
                 const jobs = res.data.jobs || [];
                 const locations = [...new Set(jobs.map(job => job.location).filter(loc => !!loc))];
@@ -41,7 +40,6 @@ const FilterCard = () => {
         };
         fetchJobs();
     }, []);
-
 
     const changeHandler = (value) => {
         setSelectedValue(String(value));
@@ -63,29 +61,31 @@ const FilterCard = () => {
     };
 
     return (
-        <div className='w-full bg-white p-3 rounded-md'>
+        <div className='w-full bg-white p-3 rounded-md shadow-md'>
             <div className="flex items-center justify-between">
-                <h1 className='font-bold text-lg'>Filter Jobs</h1>
-                {selectedValue && (
-                    <button
-                        onClick={handleClear}
-                        className='text-sm text-blue-600 hover:underline'
-                    >
-                        Clear Filter
-                    </button>
-                )}
+                <h1 className='font-bold text-lg text-gray-800'>Filter Jobs</h1>
+                <button
+                    onClick={handleClear}
+                    disabled={!selectedValue}
+                    className={`ml-4 px-3 py-1 text-sm rounded-lg shadow transition-all duration-200 
+                        ${selectedValue 
+                            ? 'bg-red-500 text-white hover:bg-red-600 cursor-pointer' 
+                            : 'bg-gray-300 text-gray-500 cursor-not-allowed'}`}
+                >
+                    Clear Filter
+                </button>
             </div>
             <hr className='mt-3' />
             <RadioGroup value={selectedValue} onValueChange={changeHandler}>
                 {Object.entries(filters).map(([filterType, array]) => (
                     <div key={filterType}>
-                        <h1 className='font-bold text-lg mt-4'>{filterDisplayNames[filterType] || filterType}</h1>
+                        <h1 className='font-bold text-lg mt-4 text-gray-700'>{filterDisplayNames[filterType] || filterType}</h1>
                         {array.map((item) => {
                             const itemId = `id-${filterType}-${item}`;
                             return (
                                 <div className='flex items-center space-x-2 my-2' key={itemId}>
                                     <RadioGroupItem value={item} id={itemId} />
-                                    <Label htmlFor={itemId}>{item}</Label>
+                                    <Label htmlFor={itemId} className='cursor-pointer'>{item}</Label>
                                 </div>
                             );
                         })}
